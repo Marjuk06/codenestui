@@ -4,25 +4,49 @@ import { useState, useEffect } from "react";
 import { PaperPlaneRight } from "@phosphor-icons/react";
 import "./AnimatedPublishButton.css";
 
-export default function AnimatedPublishButton() {
+interface ButtonProps {
+  onClick: () => void;
+  isValid: boolean;
+}
+
+export default function AnimatedPublishButton({ onClick, isValid }: ButtonProps) {
   const [status, setStatus] = useState<"idle" | "processing" | "reverting">("idle");
   const [isBouncing, setIsBouncing] = useState(false);
+  const [showError, setShowError] = useState(false);
+  const [displayedText, setDisplayedText] = useState("");
+  
+  const errorMessage = "Type the code first...";
 
-  const handleClick = () => {
-    if (status !== "idle") return;
-    
-    setIsBouncing(true); // Trigger the jelly bounce
-    setStatus("processing");
+  // Handle the typewriter error effect
+  useEffect(() => {
+    if (showError) {
+      let i = 0;
+      setDisplayedText("");
+      
+      const typingInterval = setInterval(() => {
+        if (i < errorMessage.length) {
+          setDisplayedText(errorMessage.slice(0, i + 1));
+          i++;
+        } else {
+          clearInterval(typingInterval);
+        }
+      }, 50);
 
-    // The entire animation sequence takes exactly 6.6 seconds
-    setTimeout(() => {
-      setStatus("reverting");
-    }, 6600);
-  };
+      const resetTimeout = setTimeout(() => {
+        setShowError(false);
+        setDisplayedText("");
+      }, 3000);
 
+      return () => {
+        clearInterval(typingInterval);
+        clearTimeout(resetTimeout);
+      };
+    }
+  }, [showError]);
+
+  // Handle the drone animation timings
   useEffect(() => {
     if (status === "reverting") {
-      // Revert animation takes 2.5 seconds, then reset to idle
       const timer = setTimeout(() => {
         setStatus("idle");
       }, 2500); 
@@ -30,15 +54,45 @@ export default function AnimatedPublishButton() {
     }
   }, [status]);
 
+  const handleClick = () => {
+    if (status !== "idle" || showError) return;
+    
+    setIsBouncing(true);
+
+    if (!isValid) {
+      setShowError(true);
+      return;
+    }
+    
+    // If valid, start drone animation AND trigger database publish
+    setStatus("processing");
+    onClick(); 
+
+    setTimeout(() => {
+      setStatus("reverting");
+    }, 6600);
+  };
+
+  // If showing error, we render a simple red squishy button
+  if (showError) {
+    return (
+      <div className={`relative w-[216px] h-[46px] flex-shrink-0 btn-jelly`} onAnimationEnd={() => setIsBouncing(false)}>
+         <button 
+           className="w-full h-full rounded-xl bg-red-500 text-white font-mono tracking-tight shadow-[0_0_20px_rgba(239,68,68,0.5)] flex items-center justify-center"
+           onClick={() => {}}
+         >
+           {displayedText}
+         </button>
+      </div>
+    );
+  }
+
+  // Otherwise, render the full Drone button
   return (
-    /* The Wrapper: Exact height (46px) to match Save Draft, with Jelly Bounce applied! */
-   <div 
+    <div 
       className={`relative w-[216px] h-[46px] flex-shrink-0 ${isBouncing ? 'btn-jelly' : ''}`}
       onAnimationEnd={() => setIsBouncing(false)}
     >
-      
-      {/* The Button: Scaled EXACTLY to 0.72. 
-          CRITICAL FIX: Keeps 's--processing' active during revert so the cup physics work! */}
       <div 
         className={`drone-btn absolute top-0 left-0 origin-top-left scale-[0.72] ${status !== 'idle' ? 's--processing' : ''} ${status === 'reverting' ? 's--reverting' : ''}`}
         onClick={handleClick}
@@ -76,8 +130,8 @@ export default function AnimatedPublishButton() {
         </div>
 
         <div className="drone-btn__text-fields">
-          <div className="drone-btn__text drone-btn__text--step-0 gap-2">
-            <PaperPlaneRight weight="fill" size={20} /> Publish
+          <div className="drone-btn__text drone-btn__text--step-0 gap-2 flex items-center justify-center w-full h-full text-white font-bold text-xl">
+            <PaperPlaneRight weight="fill" size={24} className="mr-2" /> Publish
           </div>
           <div className="drone-btn__text drone-btn__text--step-1">
             Bundling

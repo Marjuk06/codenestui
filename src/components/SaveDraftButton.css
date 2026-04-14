@@ -1,0 +1,92 @@
+/* src/components/SaveDraftButton.css */
+
+.draft-btn {
+  position: relative;
+  background-color: rgba(0, 0, 0, 0.3); /* Premium bg-black/30 */
+  backdrop-filter: blur(24px); /* backdrop-blur-xl */
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px; /* Nextjs rounded-xl */
+  padding: 10px 24px;
+  font-size: 14px;
+  font-weight: 500;
+  outline: none;
+  cursor: pointer;
+  transform-style: preserve-3d;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: transform 300ms ease-in-out, background-color 300ms ease-in-out, border-color 300ms ease-in-out;
+}
+
+.draft-btn:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* The text/icon on the front of the button */
+.draft-btn-text {
+  position: relative;
+  z-index: 5;
+  transition: opacity 150ms ease-in-out;
+}
+
+/* The "SAVED" text that appears when flipped */
+.draft-btn::before {
+  content: 'SAVED';
+  position: absolute;
+  z-index: 10;
+  /* Since the button flips 180deg, this text starts upside down so it becomes upright! */
+  transform: rotateX(180deg);
+  color: #fff;
+  font-weight: bold;
+  letter-spacing: 2px;
+  opacity: 0;
+  transition: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+/* The expanding progress bar background */
+.draft-btn::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 20%;
+  opacity: 0;
+  height: 100%;
+  overflow: hidden;
+  background-color: rgba(139, 92, 246, 0.5); /* Brand Accent Purple */
+  border-radius: 12px;
+  transition: width 10ms 600ms ease-in-out, opacity 250ms 300ms ease-in;
+  z-index: 0;
+}
+
+/* --- ACTIVE (FLIPPED) STATE --- */
+.draft-btn.is-active {
+  transform: rotateX(180deg);
+  background-color: rgba(0, 0, 0, 0.5);
+  border-color: rgba(83, 226, 194, 0.5); /* Success Green Border */
+}
+
+/* Hide front text so it doesn't show backwards through the glass */
+.draft-btn.is-active .draft-btn-text {
+  opacity: 0;
+}
+
+/* Expand the progress bar and turn it green */
+.draft-btn.is-active::after {
+  opacity: 1;
+  background-color: rgba(83, 226, 194, 0.3); /* Success Green Fill */
+  width: 100%;
+  transition: width 1s 0.5s ease-in-out, background-color 300ms 300ms ease-in, opacity 250ms 300ms ease-in;
+}
+
+/* Fade in the "SAVED" text */
+.draft-btn.is-active::before {
+  opacity: 1;
+  transition: opacity 250ms 1.5s ease-in;
+}
