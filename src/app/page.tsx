@@ -6,7 +6,7 @@ import ComponentCard from "@/components/ComponentCard";
 import { MagnifyingGlass, Crown, CircleNotch } from "@phosphor-icons/react";
 import AnimatedCheckbox from "@/components/AnimatedCheckbox";
 import Link from "next/link";
-import { Analytics } from "@vercel/analytics/next"
+
 interface CodeComponent {
   id: string;
   title: string;
